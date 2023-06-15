@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+
+  <link rel="shortcut icon" type="image/x-icon"
+    href="https://leafletjs.com/examples/quick-start/docs/images/favicon.ico" />
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <!-- Make sure you put this AFTER Leaflet's CSS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+  <!-- Leaflet Routing Machine CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css" />
+
+  <!-- Leaflet Routing Machine JavaScript -->
+  <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
+
+  <!-- Leaflet Control Geocoder CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+
+  <!-- Leaflet Control Geocoder JavaScript -->
+  <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+
+  <!-- To use location suggestion for input field -->
+  <script src="https://api-maps.yandex.ru/2.1/?apikey=f4a4f4eb-defd-4bc6-9f44-6bfe50a5157f&lang=en_RU"
+    type="text/javascript"></script>
+
+  <style>
+    html,
+    body {
+      height: 100%;
+      width: 100%;
+      margin: 0;
+    }
+
+    .leaflet-container {
+      height: 100%;
+      width: 100%;
+      max-width: 100%;
+      max-height: 100%;
+    }
+
+    #map {
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
+
+    #fromInputField {
+      z-index: 3;
+      position: absolute;
+      bottom: 180px;
+      left: 20px
+    }
+
+    #toInputField {
+      z-index: 3;
+      position: absolute;
+      bottom: 150px;
+      left: 20px;
+    }
+
+    #createRouteBtn {
+      z-index: 3;
+      position: absolute;
+      bottom: 120px;
+      left: 20px;
+    }
+  </style>
+
+
+</head>
+
+<body>
+
+  <div id="map"></div>
+  <div>
+    <input type="text" id="fromInputField" placeholder="From:">
+    <input type="text" id="toInputField" placeholder="To:">
+    <button onclick="createRoute()" id="createRouteBtn">Create Route</button>
+  </div>
+
+
+
+
+
+
+
+
+
+
+
+  <script>
+    ymaps.ready(()=> {
+      new ymaps.SuggestView(document.getElementById('fromInputField'));
+      new ymaps.SuggestView(document.getElementById('toInputField'));
+    })
+    
+    const map = L.map('map').setView([41.322093, 69.253952], 16);
+
+    const tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    }).addTo(map);
+
+    // const marker = L.marker([41.322093, 69.253952]).addTo(map)
+    //   .bindPopup('<b>Hello world!</b><br />I am a popup.').openPopup();
+
+    function createRoute() {
+      var from = document.getElementById("fromInputField").value;
+      var to = document.getElementById("toInputField").value;
+
+      var geocoder = new L.Control.Geocoder.Nominatim();
+
+      geocoder.geocode(from, function (fromResults) {
+        geocoder.geocode(to, function (toResults) {
+          if (fromResults.length === 0) {
+        console.log('No results found for ' + from)
+      }else if(toResults.length ===0){
+        console.log('No results found for ' + to)
+      }else{
+          var fromLatLng = fromResults[0].center;
+          var toLatLng = toResults[0].center;
+
+          var routingControl = L.Routing.control({
+            waypoints: [
+              fromLatLng,
+              toLatLng
+            ],
+            routeWhileDragging: true
+          }).addTo(map);
+      }
+        });
+      });
+    }
+
+    function onMapClick(e) {
+      console.log(e.latlng);
+      const popup = L.popup();
+      const circle = L.circle(e.latlng, {
+        color: '#ff0',
+        fillColor: '#0a0',
+        fillOpacity: 0.1,
+        radius: 50
+      })
+      circle.addTo(map);
+      popup
+        .setLatLng(e.latlng)
+        .setContent(e.latlng.toString())
+        .openOn(map);
+    }
+
+    map.on('click', onMapClick);
+
+  </script>
+</body>
+
+</html>

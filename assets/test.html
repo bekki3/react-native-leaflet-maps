@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval' data: gap:">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Yandex Map</title>
+  <script src="https://api-maps.yandex.ru/2.1/?apikey=f4a4f4eb-defd-4bc6-9f44-6bfe50a5157f&lang=en_RU" type="text/javascript"></script>
+  <style>
+    html,
+    body,
+    #map {
+      width: 90%;
+      height: 90%;
+      padding: 0;
+      margin: 0;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="map"></div>
+  <h1>Yandex Maps Example</h1>
+    <input type="text" id="searchInput" />
+
+  
+
+  <!-- <script>
+    const consoleLog = (type, log) => window.ReactNativeWebView.postMessage(JSON.stringify({'type': 'Console', 'data': {'type': type, 'log': log}}));
+  console = {
+      log: (log) => consoleLog('log', log),
+      debug: (log) => consoleLog('debug', log),
+      info: (log) => consoleLog('info', log),
+      warn: (log) => consoleLog('warn', log),
+      error: (log) => consoleLog('error', log),
+    };
+  </script> -->
+
+
+  <script type="text/javascript">
+
+    /////////////////////
+    ymaps.ready(init);
+    function init() {
+      var myMap = new ymaps.Map("map", {
+        center: [41.322093, 69.253952],
+        zoom: 16
+      });
+        myMap.controls.remove('zoomControl');
+        myMap.controls.remove('searchControl');
+        //myMap.controls.remove('routeEditor');
+        //myMap.controls.remove('trafficControl');
+        //myMap.controls.remove('typeSelector');
+        //myMap.controls.remove('geolocationControl');
+      let myPlacemark;
+
+
+
+      const searchInput = document.getElementById('searchInput'); //Search in text input
+        const suggestView = new ymaps.SuggestView(searchInput);
+        suggestView.events.add('select', (e) => {
+          const suggestion = e.get('item').value;
+          ymaps.geocode(suggestion).then((res) => {
+            const firstGeoObject = res.geoObjects.get(0);
+            const coords = firstGeoObject.geometry.getCoordinates();
+            let selectedLocation = new ymaps.Placemark(coords, {
+            hintContent: `From: ${suggestion}`}, {iconColor: "#FF0000"});
+            myMap.geoObjects.add(selectedLocation);
+            myMap.panTo(coords, {duration: 500});
+            //console.log(coords);
+          });
+        });
+
+
+
+      myMap.events.add('click', function (e) {
+        console.log("Success");
+        var coords = e.get('coords');
+
+        
+       //REVERSE GEOCODE
+        ymaps.geocode(coords).then((res) => {
+          const firstGeoObject = res.geoObjects.get(0);
+          const name = firstGeoObject.properties.get('name');
+          console.log(name);
+        });
+
+
+        
+        //REVERSE GEOCODE
+        // ymaps.geocode(coords).then((res) => {
+        //   const firstGeoObject = res.geoObjects.get(0);
+        //   const name = firstGeoObject.properties.get('name');
+        //   console.log(name);
+        // });
+
+
+        
+        //GEOCODE
+        // ymaps.geocode("inha")
+        // .then((res) => {
+        //     const firstGeoObject = res.geoObjects.get(0);
+        //     coords = firstGeoObject.geometry.getCoordinates();
+        //     myMap.panTo(coords, {duration: 500});
+        //     console.log(coords);
+        //   }, (err) => {
+        //     console.log(err)
+        //   }
+        // );
+
+        console.log(coords);
+        
+        if (myPlacemark) {
+          myPlacemark.geometry.setCoordinates(coords);
+        } else {
+          myPlacemark = new ymaps.Placemark(coords, {
+            hintContent: 'Clicked location',
+          });
+          myMap.geoObjects.add(myPlacemark);
+        }
+        myMap.panTo(coords, {duration: 500});
+      });
+    }
+
+
+////////////
+
+
+
+  </script>
+</body>
+
+</html>
